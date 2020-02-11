@@ -1,0 +1,18 @@
+{
+    "name": "jeanisahakyan/motion-dots",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jean Isahakyan",
+            "email": "jeanisahkyan@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+            "MotionDots\\": "src"
+        }
+    }
+}
