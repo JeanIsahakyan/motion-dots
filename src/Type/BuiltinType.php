@@ -15,7 +15,7 @@ class BuiltinType extends AbstractType implements TypeInterface {
      */
     public function build() {
         [$type, $value] = $this->field;
-        if ($type === 'boolean') {
+        if ($type === 'boolean' || $type === 'bool') {
             if ($value === 'false' || $value === '0') {
                 $value = false;
             } elseif ($type === 'true' || $value === '1') {

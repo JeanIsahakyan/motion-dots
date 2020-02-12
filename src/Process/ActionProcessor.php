@@ -131,7 +131,7 @@ class ActionProcessor {
                     throw new ErrorException(InternalErrors::PARAM_UNSUPPORTED, "Unsupported param `{$param_name}` with type `{$param_type_name}`");
                 }
             }
-            if (!$resolver) {
+            if ($resolver === null) {
                 throw new ErrorException(InternalErrors::PARAM_UNKNOWN_RESOLVER, "Unknown resolver for param `{$param_name}` with type `{$param_type_name}`");
             }
             $this->processed_params[$index] = $resolver;
