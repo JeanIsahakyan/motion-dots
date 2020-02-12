@@ -7,7 +7,6 @@
             "email": "jeanisahkyan@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "ext-json": "^1.6"
     },
