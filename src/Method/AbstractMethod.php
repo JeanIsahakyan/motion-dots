@@ -26,7 +26,8 @@ abstract class AbstractMethod implements MethodInterface {
      * @return string
      */
     public final function __toString(): string {
-        return lcfirst(get_class($this));
+        $exploded_name = explode('\\', get_class($this));
+        return lcfirst(array_pop($exploded_name));
     }
 
     /**
