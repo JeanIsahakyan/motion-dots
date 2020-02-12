@@ -35,6 +35,6 @@ abstract class AbstractMethod implements MethodInterface {
      * @return bool
      */
     public final function __actionExists(string $action): bool {
-        return method_exists($this, $action);
+        return in_array($action, get_class_methods($this), true);
     }
 }

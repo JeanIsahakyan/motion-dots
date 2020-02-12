@@ -8,11 +8,11 @@ require_once './Types/IntArrayType.php';
 
 class Users extends AbstractMethod {
 
-    public function getOne(int $user_id): AbstractResponse {
+    public function getOne(int $user_id): UserResponse {
         return new UserResponse($user_id, 'Jane', 'Doe', new IntArrayType('1,2'));
     }
 
-    public function getMany(IntArrayType $user_ids): AbstractResponse {
+    public function getMany(IntArrayType $user_ids): ItemsResponse {
         $user_ids = $user_ids->build();
         $items = [];
         foreach ($user_ids as $user_id) {

@@ -87,28 +87,29 @@ class Processor {
 
 
     /**
-     * @param array|object $object
+     * @param array $response
      *
      * @return mixed
      */
-    private function responseToArray($object) {
-        if (is_object($object)) {
-            if (method_exists($object, 'build')) {
-                return $object->build();
-            }
-            $object = (array)$object;
-        }
-        $response = [];
-        foreach ($object as $key => $value) {
-            if (strpos(trim($key), 'MotionDots\Response\AbstractResponse') !== false) {
+    private function buildResponse($response) {
+        $return_response = [];
+        foreach ($response as $key => $row) {
+            if (strpos($key, '__internal_method_errors') !== false) {
                 continue;
             }
-            if (is_object($value)) {
-               $value = $this->responseToArray($value);
+            if (is_object($row)) {
+                if (method_exists($row, 'build')) {
+                    $row = $row->build();
+                } else {
+                    $row = (array)$row;
+                }
             }
-            $response[$key] = $value;
+            if (is_array($row)) {
+                $row = $this->buildResponse($row);
+            }
+            $return_response[$key] = $row;
         }
-        return $response;
+        return $return_response;
     }
 
     /**
@@ -121,7 +122,7 @@ class Processor {
      */
     public function invokeProcess(string $method_and_action, array $params = []): array {
         $response = (array)$this->tryInvokeProcess($method_and_action, $params);
-        return $this->responseToArray($response);
+        return $this->buildResponse($response);
     }
 
     /**

@@ -16,13 +16,13 @@ abstract class AbstractResponse implements ResponseInterface {
     /**
      * @var ErrorsInterface
      */
-    private $_errors = null;
+    private $__internal_method_errors = null;
 
     /**
      * @param ErrorsInterface $errors
      */
     public final function setErrors(ErrorsInterface $errors) {
-        $this->_errors = $errors;
+        $this->__internal_method_errors = $errors;
     }
 
     /**
@@ -36,6 +36,6 @@ abstract class AbstractResponse implements ResponseInterface {
      * @return ErrorsInterface
      */
     public final function getErrors(): ErrorsInterface {
-        return $this->_errors;
+        return $this->__internal_method_errors;
     }
 }
