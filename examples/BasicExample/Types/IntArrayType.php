@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class UserType
+ * Class IntArrayType
  */
 class IntArrayType extends \MotionDots\Type\AbstractType {
 
