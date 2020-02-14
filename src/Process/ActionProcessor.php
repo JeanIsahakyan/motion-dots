@@ -86,7 +86,7 @@ class ActionProcessor {
      * @return bool
      */
     private function paramExists(string $param): bool {
-        return array_key_exists($param, $this->params) && trim($this->params[$param]);
+        return array_key_exists($param, $this->params);
     }
 
     /**
