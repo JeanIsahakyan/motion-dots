@@ -17,6 +17,8 @@ class ErrorException extends \Exception {
   public const CONTEXT_UNDEFINED_FIELD = -4;
   public const METHOD_ACTION_UNDEFINED = -4;
   public const METHOD_UNDEFINED        = -5;
+  public const PARAM_INCORRECT         = -6;
+  public const INTERNAL_ERROR          = -7;
 
   /**
    * BasicException constructor.
@@ -25,7 +27,7 @@ class ErrorException extends \Exception {
    *
    * @param string|null $additional_message
    */
-  public function __construct(int $error_code = null, string $additional_message = null) {
+  public function __construct(int $error_code = null, ?string $additional_message = null) {
     parent::__construct($additional_message, $error_code);
   }
 }

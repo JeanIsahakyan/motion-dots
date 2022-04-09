@@ -4,9 +4,7 @@ namespace MotionDots\Process;
 
 use MotionDots\Exception\ErrorException;
 use MotionDots\Method\System;
-use MotionDots\Schema\AbstractSchema;
-use MotionDots\Type\AbstractType;
-use MotionDots\Type\BuiltinType;
+use MotionDots\Schema\Schema;
 
 /**
  * Class Processor
@@ -23,7 +21,7 @@ class Processor {
   protected $context;
 
   /**
-   * @var AbstractSchema
+   * @var Schema
    */
   protected $schema;
 
@@ -35,10 +33,10 @@ class Processor {
   /**
    * Processor constructor.
    *
-   * @param AbstractSchema $schema
+   * @param Schema $schema
    * @param string $method_and_action_separator
    */
-  public function __construct(AbstractSchema $schema, string $method_and_action_separator = '.', bool $disable_system_methods = false) {
+  public function __construct(Schema $schema, string $method_and_action_separator = '.', bool $disable_system_methods = false) {
     $this->schema                  = $schema;
     if (!$disable_system_methods) {
       $this->schema->addMethod(new System($this->schema, $method_and_action_separator));

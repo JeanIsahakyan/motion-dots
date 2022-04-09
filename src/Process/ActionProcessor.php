@@ -112,9 +112,9 @@ class ActionProcessor {
       }
       $param_value = $this->getParam($param_name);
       if ($param_type->isBuiltin()) {
-        $resolver = (new BuiltinType([$param_type_name, $param_value]))->parse();
+        $resolver = (new BuiltinType([$param_type_name, $param_value], $param_name))->parse();
       } elseif (class_exists($param_type_name)) {
-        $resolver = new $param_type_name($param_value);
+        $resolver = new $param_type_name($param_value, $param_name);
       } else {
         throw new ErrorException(ErrorException::PARAM_UNSUPPORTED, "Unsupported param `{$param_name}` with type `{$param_type_name}`");
       }

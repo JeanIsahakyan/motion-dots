@@ -2,10 +2,6 @@
 
 namespace MotionDots\Process;
 
-use App\Graphql\Utils\Resolver\AbstractResolver;
-use MotionDots\Type\AbstractType;
-use MotionDots\Type\BuiltinType;
-
 /**
  * Class ResponseBuilder
  *
@@ -14,38 +10,42 @@ use MotionDots\Type\BuiltinType;
  * @author Jean Isahakyan jeanisahakyan@gmail.com
  */
 class ResponseBuilder {
-  private const BUILTIN_TYPES = [
-    'boolean',
-    'integer',
-    'double',
-    'string',
-    'null',
-  ];
-  private static function isBuiltinType($row) {
-    return in_array(gettype($row), self::BUILTIN_TYPES);
-  }
-
   private static function response($response): array {
     return [
       'response' => $response,
     ];
   }
-  public static function build($response) {
+
+  private static function tryBuildInternal($response) {
+    if (is_object($response) && method_exists($response, 'build')) {
+      $response = $response->build();
+      $response = self::tryBuild($response);
+    }
+    if (is_array($response)) {
+      $response = self::tryBuild($response);
+    }
+    if (is_object($response)) {
+      $response = self::tryBuild($response);
+    }
+    return $response;
+  }
+
+  public static function tryBuild($response) {
     if (is_scalar($response)) {
-      return self::response($response);
+      return $response;
+    }
+    if (is_object($response)) {
+      return self::tryBuildInternal($response);
     }
     $result = [];
     foreach ($response as $key => $row) {
-      if ($row instanceof AbstractType) {
-        $row = $row->build();
-        if (is_array($row)) {
-          $row = self::build($row);
-        } elseif (self::isBuiltinType($row)) {
-          $row = (new BuiltinType($row))->build();
-        }
-      }
-      $result[$key] = $row;
+      $result[$key] = self::tryBuildInternal($row);
     }
-    return self::response($result);
+    return $result;
+  }
+
+  public static function build($response) {
+    $response = self::tryBuild($response);
+    return self::response(self::tryBuild($response));
   }
 }

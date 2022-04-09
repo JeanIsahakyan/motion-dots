@@ -1,6 +1,8 @@
 <?php
 namespace MotionDots\Type;
 
+use MotionDots\Process\ContextContainer;
+
 /**
  * Class AbstractType
  *
@@ -16,15 +18,19 @@ abstract class AbstractType implements TypeInterface {
   /**
    * @var mixed
    */
-  protected $field = null;
+  protected $field      = null;
+  protected $param_name = null;
+  protected $context = null;
 
   /**
    * AbstractType constructor.
    *
    * @param mixed $field
    */
-  public function __construct($field = null) {
-    $this->field = $field;
+  public function __construct($field = null, $param_name = null, ?ContextContainer $context = null) {
+    $this->field      = $field;
+    $this->param_name = $param_name;
+    $this->context    = $context;
   }
 
 

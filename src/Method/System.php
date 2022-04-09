@@ -1,7 +1,8 @@
 <?php
 namespace MotionDots\Method;
 use MotionDots\Process\ContextContainer;
-use MotionDots\Schema\AbstractSchema;
+use MotionDots\Response\ResponseInterface;
+use MotionDots\Schema\Schema;
 use MotionDots\Type\BuiltinType;
 use MotionDots\Type\TypeInterface;
 
@@ -9,12 +10,15 @@ class System extends AbstractMethod {
   private $schema_info;
   private $method_action_separator;
 
-  public function __construct(AbstractSchema $schema_info, string  $method_action_separator) {
-      $this->schema_info             = $schema_info;
-      $this->method_action_separator = $method_action_separator;
+  public function __construct(Schema &$schema_info, string  $method_action_separator) {
+    $this->schema_info             = $schema_info;
+    $this->method_action_separator = $method_action_separator;
   }
 
-  private function parseType(\ReflectionType $type): ?array {
+  private function parseType(?\ReflectionType $type): ?array {
+    if (!$type) {
+      return null;
+    }
     $name = $type->getName();
     if ($name === ContextContainer::class) {
       return null;
@@ -30,17 +34,18 @@ class System extends AbstractMethod {
     $class = new \ReflectionClass($name);
     [$interface] = $class->getInterfaceNames();
     if ($interface === TypeInterface::class) {
-     return [
+      return [
         'name'        => $name::NAME,
         'description' => $name::DESCRIPTION,
         'example'     => (new $name)->example(),
         'isRequired'  => !$type->allowsNull(),
-     ];
+      ];
     }
     return null;
   }
 
   public function getSchema(): array {
+    $result = [];
     foreach ($this->schema_info->getMethods() as $method_name => $method) {
       try {
         $reflection = new \ReflectionClass($method);
@@ -66,25 +71,36 @@ class System extends AbstractMethod {
         $response = 'unknown';
         if ($return_type) {
           if ($return_type->isBuiltin()) {
-            $response = $this->parseType($return_type);
+            $response = [
+              'type'       => $this->parseType($return_type),
+            ];
           } else {
             $response_reflection = new \ReflectionClass($return_type->getName());
-            $response_value = $response_reflection->getMethod('__construct');
-            $response = [];
+            $response = [
+              ResponseInterface::TYPE_ID_FIELD => [
+                [
+                  'name' => ResponseInterface::TYPE_ID_FIELD,
+                  'type' => 'string',
+                ]
+              ],
+            ];
             foreach ($response_reflection->getProperties() as $property) {
               $response[$property->getName()] = [
                 'name'       => $property->getName(),
                 'type'       => 'unknown',
               ];
             }
-            foreach ($response_value->getParameters() as $response_field) {
-              $response_field_name = $response_field->getName();
-              if (array_key_exists($response_field_name, $response)) {
-                $response[$response_field_name]['type'] = $this->parseType($response_field->getType());
+            if ($response_reflection->hasMethod('__construct')) {
+              $response_value = $response_reflection->getMethod('__construct');
+              foreach ($response_value->getParameters() as $response_field) {
+                $response_field_name = $response_field->getName();
+                if (array_key_exists($response_field_name, $response)) {
+                  $response[$response_field_name]['type'] = $this->parseType($response_field->getType());
+                }
               }
             }
+            $response = array_values($response);
           }
-          $response = array_values($response);
         }
         $method =  [
           'name'     => "{$method_name}{$this->method_action_separator}{$action_name}",
@@ -95,10 +111,17 @@ class System extends AbstractMethod {
         if ($response) {
           $method['response'] = $response;
         }
-        $result[] = $method;
+        if (!array_key_exists($method_name, $result)) {
+          $result[$method_name] = [
+            'name'    => $method_name,
+            'methods' => [],
+          ];
+        }
+
+        $result[$method_name]['methods'][] = $method;
       }
     }
-    return $result;
+    return array_values($result);
   }
 
   public function serverTime(): int {
