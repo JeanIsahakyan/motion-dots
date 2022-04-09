@@ -2,10 +2,11 @@
 
 namespace MotionDots\Process;
 
-use MotionDots\Error\InternalErrors;
 use MotionDots\Exception\ErrorException;
-use MotionDots\Response\AbstractResponse;
+use MotionDots\Method\System;
 use MotionDots\Schema\AbstractSchema;
+use MotionDots\Type\AbstractType;
+use MotionDots\Type\BuiltinType;
 
 /**
  * Class Processor
@@ -16,120 +17,92 @@ use MotionDots\Schema\AbstractSchema;
  */
 class Processor {
 
-    /**
-     * @var ContextContainer
-     */
-    protected $context;
+  /**
+   * @var ContextContainer
+   */
+  protected $context;
 
-    /**
-     * @var AbstractSchema
-     */
-    protected $schema;
+  /**
+   * @var AbstractSchema
+   */
+  protected $schema;
 
-    /**
-     * @var string
-     */
-    protected $method_action_separator;
+  /**
+   * @var string
+   */
+  protected $method_action_separator;
 
-    /**
-     * Processor constructor.
-     *
-     * @param AbstractSchema $schema
-     * @param string $method_and_action_separator
-     */
-    public function __construct(AbstractSchema $schema, string $method_and_action_separator = '.') {
-        $this->schema                  = $schema;
-        $this->context                 = new ContextContainer();
-        $this->method_action_separator = $method_and_action_separator;
+  /**
+   * Processor constructor.
+   *
+   * @param AbstractSchema $schema
+   * @param string $method_and_action_separator
+   */
+  public function __construct(AbstractSchema $schema, string $method_and_action_separator = '.', bool $disable_system_methods = false) {
+    $this->schema                  = $schema;
+    if (!$disable_system_methods) {
+      $this->schema->addMethod(new System($this->schema, $method_and_action_separator));
     }
+    $this->context                 = new ContextContainer();
+    $this->method_action_separator = $method_and_action_separator;
+  }
 
-    /**
-     * @param string $method_and_action
-     *
-     * @throws ErrorException
-     *
-     * @return array
-     */
-    private function unpackMethodAndAction(string $method_and_action) {
-        $result = explode('.', $method_and_action);
-        if (count($result) < 2) {
-            throw new ErrorException(InternalErrors::METHOD_ACTION_UNDEFINED, "Action can't be null");
-        }
-        return $result;
+  /**
+   * @param string $method_and_action
+   *
+   * @throws ErrorException
+   *
+   * @return array
+   */
+  private function unpackMethodAndAction(string $method_and_action) {
+    $result = explode($this->method_action_separator, $method_and_action);
+    if (count($result) < 2) {
+      throw new ErrorException(ErrorException::METHOD_ACTION_UNDEFINED, "Action can't be null");
     }
+    return $result;
+  }
 
-    /**
-     * @return ContextContainer
-     */
-    public function getContext(): ContextContainer {
-        return $this->context;
+  /**
+   * @return ContextContainer
+   */
+  public function getContext(): ContextContainer {
+    return $this->context;
+  }
+
+  /**
+   * @throws ErrorException
+   */
+  private function tryInvokeProcess(string $method_and_action, array $params = []) {
+    [$method_name, $action_name] = $this->unpackMethodAndAction($method_and_action);
+    if (!$this->schema->methodExists($method_name)) {
+      throw new ErrorException(ErrorException::METHOD_UNDEFINED, "Undefined method `{$method_name}`");
     }
-
-    /**
-     * @param string $method_and_action
-     * @param array $params
-     *
-     * @throws ErrorException
-     *
-     * @return AbstractResponse
-     */
-    private function tryInvokeProcess(string $method_and_action, array $params = []): AbstractResponse {
-        [$method_name, $action_name] = $this->unpackMethodAndAction($method_and_action);
-        if (!$this->schema->methodExists($method_name)) {
-            throw new ErrorException(InternalErrors::METHOD_UNDEFINED, "Undefined method `{$method_name}`");
-        }
-        $method = $this->schema->getMethod($method_name);
-        if (!$method->__actionExists($action_name)) {
-            throw new ErrorException(InternalErrors::METHOD_ACTION_UNDEFINED, "Undefined action `{$action_name}` in method `{$method_name}`");
-        }
-        return ActionProcessor::create($method, $action_name, $this->getContext(), $params)->invoke();
+    $method = $this->schema->getMethod($method_name);
+    if (!$method->__actionExists($action_name)) {
+      throw new ErrorException(ErrorException::METHOD_ACTION_UNDEFINED, "Undefined action `{$action_name}` in method `{$method_name}`");
     }
+    $method->__setContext($this->context);
+    return ActionProcessor::create($method, $action_name, $params)->invoke();
+  }
 
+  /**
+   * @throws ErrorException
+   */
+  public function invokeProcess(string $method_and_action, array $params = []): array {
+    return ResponseBuilder::build($this->tryInvokeProcess($method_and_action, $params));
+  }
 
-    /**
-     * @param array $response
-     *
-     * @return mixed
-     */
-    private function buildResponse($response) {
-        $return_response = [];
-        foreach ($response as $key => $row) {
-            if (strpos($key, '__internal_method_errors') !== false) {
-                continue;
-            }
-            if (is_object($row)) {
-                if (method_exists($row, 'build')) {
-                    $row = $row->build();
-                } else {
-                    $row = (array)$row;
-                }
-            }
-            if (is_array($row)) {
-                $row = $this->buildResponse($row);
-            }
-            $return_response[$key] = $row;
-        }
-        return $return_response;
+  public function execute(string $method_and_action, array $params = []): array {
+    try {
+      return $this->invokeProcess($method_and_action, $params);
+    } catch (\Exception $exception) {
+      return [
+        'error' => [
+          'error_code'    => $exception->getCode(),
+          'error_message' => $exception->getMessage(),
+        ]
+      ];
     }
-
-    /**
-     * @param string $method_and_action
-     * @param array $params
-     *
-     * @throws ErrorException
-     *
-     * @return array
-     */
-    public function invokeProcess(string $method_and_action, array $params = []): array {
-        $response = (array)$this->tryInvokeProcess($method_and_action, $params);
-        return $this->buildResponse($response);
-    }
-
-    /**
-     * @return array
-     */
-    public function getSchemaInfo(): array {
-        return (new SchemaInfoProcessor($this->schema))->build();
-    }
+  }
 
 }

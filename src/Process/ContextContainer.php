@@ -1,7 +1,6 @@
 <?php
 namespace MotionDots\Process;
 
-use MotionDots\Error\InternalErrors;
 use MotionDots\Exception\ErrorException;
 
 /**
@@ -37,7 +36,7 @@ class ContextContainer {
      */
     public function get(string $field) {
         if (!$this->exists($field)) {
-            throw new ErrorException(InternalErrors::CONTEXT_UNDEFINED_FIELD, "Can't get undefined field `{$field}`");
+            throw new ErrorException(ErrorException::CONTEXT_UNDEFINED_FIELD, "Can't get undefined field `{$field}`");
         }
         return $this->fields[$field];
     }

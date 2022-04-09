@@ -7,10 +7,6 @@
             "email": "jeanisahkyan@gmail.com"
         }
     ],
-    "require": {
-        "php": ">=7.2",
-        "ext-json": "^1.6"
-    },
     "autoload": {
         "psr-4": {
             "MotionDots\\": "src"

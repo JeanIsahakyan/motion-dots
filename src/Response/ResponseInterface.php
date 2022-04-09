@@ -17,9 +17,4 @@ interface ResponseInterface {
      * @return array
      */
     public function build(): array;
-
-    /**
-     * @return ErrorsInterface
-     */
-    public function getErrors(): ErrorsInterface;
 }

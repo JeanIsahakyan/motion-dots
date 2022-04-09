@@ -1,7 +1,6 @@
 <?php
 namespace MotionDots\Schema;
 
-use MotionDots\Error\InternalErrors;
 use MotionDots\Exception\ErrorException;
 use MotionDots\Method\AbstractMethod;
 
@@ -36,7 +35,7 @@ abstract class AbstractSchema implements SchemaInterface {
     public final function addMethod(AbstractMethod $method): void {
         $method_name = (string)$method;
         if ($this->methodExists($method_name)) {
-            throw new ErrorException(InternalErrors::SCHEMA_METHOD_EXISTS, "Method `{$method_name}` already exists.");
+            throw new ErrorException(ErrorException::SCHEMA_METHOD_EXISTS, "Method `{$method_name}` already exists.");
         }
         $this->methods[$method_name] = $method;
     }

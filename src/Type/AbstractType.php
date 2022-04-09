@@ -10,24 +10,39 @@ namespace MotionDots\Type;
  */
 abstract class AbstractType implements TypeInterface {
 
-    /**
-     * @var mixed
-     */
-    protected $field = null;
+  public const NAME        = 'No name';
+  public const DESCRIPTION = 'No description';
 
-    /**
-     * AbstractType constructor.
-     *
-     * @param mixed $field
-     */
-    public function __construct($field = null) {
-        $this->field = $field;
-    }
+  /**
+   * @var mixed
+   */
+  protected $field = null;
 
-    /**
-     * @return mixed
-     */
-    public function build() {
-        return $this->field;
-    }
+  /**
+   * AbstractType constructor.
+   *
+   * @param mixed $field
+   */
+  public function __construct($field = null) {
+    $this->field = $field;
+  }
+
+
+  public function example(): string {
+    return 'No example';
+  }
+
+  /**
+   * @return mixed
+   */
+  public function parse() {
+    return $this->field;
+  }
+
+  /**
+   * @return mixed
+   */
+  public function build() {
+    return $this->field;
+  }
 }
