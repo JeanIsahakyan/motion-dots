@@ -1,0 +1,55 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "c0895d978b883787c9493a83ffc880cb",
+    "packages": [
+        {
+            "name": "jeanisahakyan/motion-dots",
+            "version": "1.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/JeanIsahakyan/motion-dots.git",
+                "reference": "6eb1d0926a3bb8ced9d3f03a5d9874cb765ddeaa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/JeanIsahakyan/motion-dots/zipball/6eb1d0926a3bb8ced9d3f03a5d9874cb765ddeaa",
+                "reference": "6eb1d0926a3bb8ced9d3f03a5d9874cb765ddeaa",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MotionDots\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jean Isahakyan",
+                    "email": "jeanisahkyan@gmail.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/JeanIsahakyan/motion-dots/issues",
+                "source": "https://github.com/JeanIsahakyan/motion-dots/tree/1.5"
+            },
+            "time": "2022-06-21T02:27:41+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
+}

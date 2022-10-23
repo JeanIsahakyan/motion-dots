@@ -1,0 +1,16 @@
+directoryIndex index.php
+addDefaultCharset utf-8
+
+RewriteEngine On
+
+RewriteBase /
+
+RedirectMatch 404 /API
+RedirectMatch 404 /\.gitignore
+RedirectMatch 404 /composer.json
+RedirectMatch 404 /composer.lock
+RedirectMatch 404 /vendor
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.php [L,QSA]
