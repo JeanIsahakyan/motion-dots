@@ -1,6 +1,6 @@
 <?php
 namespace MotionDots\Method;
-use MotionDots\Process\ContextContainer;
+
 use MotionDots\Response\ResponseInterface;
 use MotionDots\Schema\Schema;
 use MotionDots\Type\BuiltinType;
@@ -8,11 +8,11 @@ use MotionDots\Type\TypeInterface;
 
 class System extends AbstractMethod {
   private $schema_info;
-  private $method_action_separator;
+  private $separator;
 
-  public function __construct(Schema &$schema_info, string  $method_action_separator) {
-    $this->schema_info             = $schema_info;
-    $this->method_action_separator = $method_action_separator;
+  public function __construct(Schema &$schema_info, string  $separator) {
+    $this->schema_info             = &$schema_info;
+    $this->separator = $separator;
   }
 
   private function parseType(?\ReflectionType $type): ?array {
@@ -20,9 +20,6 @@ class System extends AbstractMethod {
       return null;
     }
     $name = $type->getName();
-    if ($name === ContextContainer::class) {
-      return null;
-    }
     if ($type->isBuiltin()) {
       return [
         'name'        => $name,
@@ -103,7 +100,7 @@ class System extends AbstractMethod {
           }
         }
         $method =  [
-          'name'     => "{$method_name}{$this->method_action_separator}{$action_name}",
+          'name'     => "{$method_name}{$this->separator}{$action_name}",
         ];
         if ($params) {
           $method['params'] = $params;

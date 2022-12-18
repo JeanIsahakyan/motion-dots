@@ -2,7 +2,7 @@
 
 namespace MotionDots\Type;
 
-use MotionDots\Process\ContextContainer;
+use MotionDots\Process\Context;
 
 interface TypeInterface {
   /**
@@ -10,7 +10,7 @@ interface TypeInterface {
    *
    * @param $field
    */
-  public function __construct($field, $param_name, ?ContextContainer $context = null);
+  public function __construct(?string $field, ?string $param_name, Context &$context);
 
   /**
    * @return mixed

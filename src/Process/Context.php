@@ -4,27 +4,18 @@ namespace MotionDots\Process;
 use MotionDots\Exception\ErrorException;
 
 /**
- * Class ContextContainer
+ * Class Context
  *
  * @package MotionDots\Process
  *
  * @author Jean Isahakyan <jeanisahakyan@gmail.com>
  */
-class ContextContainer {
+class Context {
 
-    /**
-     * @var mixed[]
-     */
-    private $fields = [];
+    private \ArrayObject $fields;
 
-
-    /**
-     * @param string $field
-     *
-     * @return bool
-     */
-    private function exists(string $field) {
-        return array_key_exists($field, $this->fields);
+    public function __construct() {
+      $this->fields = new \ArrayObject();
     }
 
     /**
@@ -35,10 +26,10 @@ class ContextContainer {
      * @return mixed
      */
     public function get(string $field) {
-        if (!$this->exists($field)) {
+        if (!$this->fields->offsetExists($field)) {
             throw new ErrorException(ErrorException::CONTEXT_UNDEFINED_FIELD, "Can't get undefined field `{$field}`");
         }
-        return $this->fields[$field];
+        return $this->fields->offsetGet($field);
     }
 
     /**
@@ -47,8 +38,9 @@ class ContextContainer {
      *
      * @return void
      */
-    public function set(string $field, $value): void {
-        $this->fields[$field] = $value;
+    public function set(string $field, $value): self {
+        $this->fields->offsetSet($field, $value);
+        return $this;
     }
 
 
@@ -63,9 +55,9 @@ class ContextContainer {
 
 
     /**
-     * @return mixed[]
+     * @return array
      */
     public function getAll(): array {
-        return $this->fields;
+        return $this->fields->getArrayCopy();
     }
 }

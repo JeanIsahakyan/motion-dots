@@ -16,8 +16,6 @@ class IntListType extends AbstractType {
   }
 
   public function parse(): array {
-    return array_map(function($list_id) {
-      return intval(trim($list_id));
-    }, explode(',', $this->field));
+    return array_map(fn($list_id) => intval(trim($list_id)), explode(',', $this->field));
   }
 }

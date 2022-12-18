@@ -2,7 +2,7 @@
 
 namespace MotionDots\Method;
 
-use MotionDots\Process\ContextContainer;
+use MotionDots\Process\Context;
 use MotionDots\Response\ResponseInterface;
 
 /**
@@ -15,12 +15,12 @@ use MotionDots\Response\ResponseInterface;
 abstract class AbstractMethod implements MethodInterface {
 
   /**
-   * @var ContextContainer
+   * @var Context
    */
   public $context;
 
-  public function __setContext(ContextContainer &$context) {
-    $this->context = $context;
+  public function __setContext(Context &$context) {
+    $this->context = &$context;
   }
 
   /**

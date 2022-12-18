@@ -3,6 +3,8 @@ namespace MotionDots\Schema;
 
 use MotionDots\Exception\ErrorException;
 use MotionDots\Method\AbstractMethod;
+use MotionDots\Process\Context;
+use MotionDots\Process\MethodProcessor;
 
 /**
  * Class Schema
@@ -41,7 +43,7 @@ class Schema {
     if ($this->methodExists($method_name)) {
       throw new ErrorException(ErrorException::SCHEMA_METHOD_EXISTS, "Methods for `{$method_name}` already exists.");
     }
-    $this->methods[$method_name] = $method;
+    $this->methods[$method_name] = &$method;
     return $this;
   }
 
@@ -71,5 +73,25 @@ class Schema {
    */
   public function getMethods(): array {
     return $this->methods;
+  }
+
+  /**
+   * @param Context $context
+   * @param string $method_name
+   * @param string $action
+   * @param array $params
+   * @return mixed
+   * @throws ErrorException
+   */
+  public function tryInvokeProcess(Context &$context, string $method_name, string &$action, array &$params) {
+    if (!$this->methodExists($method_name)) {
+      throw new ErrorException(ErrorException::METHOD_UNDEFINED, "Undefined method `{$method_name}`");
+    }
+    $method = &$this->methods[$method_name];
+    if (!$method->__actionExists($action)) {
+      throw new ErrorException(ErrorException::METHOD_ACTION_UNDEFINED, "Undefined action `{$action_name}` in method `{$method_name}`");
+    }
+    $method->context = &$context;
+    return MethodProcessor::create($method, $action, $params)->invoke();
   }
 }
