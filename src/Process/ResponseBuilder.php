@@ -34,6 +34,9 @@ class ResponseBuilder {
     if (is_scalar($response)) {
       return $response;
     }
+    if ($response instanceof \BackedEnum) {
+      return $response->value;
+    }
     if (is_object($response)) {
       return self::tryBuildInternal($response);
     }

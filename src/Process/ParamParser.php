@@ -3,6 +3,7 @@ namespace MotionDots\Process;
 
 use MotionDots\Exception\ErrorException;
 use MotionDots\Type\BuiltinType;
+use MotionDots\Type\EnumType;
 
 /**
  * Class ParamParser
@@ -59,6 +60,8 @@ class ParamParser {
       $param_value = $this->getParam($param_name);
       if ($param_type->isBuiltin()) {
         $resolver = (new BuiltinType([$param_type_name, $param_value], $param_name, $this->context))->parse();
+      } elseif (enum_exists($param_type_name)) {
+        $resolver = (new EnumType([$param_type_name, $param_value], $param_name, $this->context))->parse();
       } elseif (class_exists($param_type_name)) {
         $resolver = new $param_type_name($param_value, $param_name, $this->context);
       } else {

@@ -10,20 +10,6 @@ namespace MotionDots\Type;
  */
 class BuiltinType extends AbstractType implements TypeInterface {
 
-  public const EXAMPLES = [
-    'string'   => 'String text',
-    'int'      => '1',
-    'integer'  => '1',
-    'bool'     => 'true',
-    'boolean'  => 'true',
-    'float'    => '1.0',
-  ];
-
-  public function example(): string  {
-    [$type] = $this->field;
-    return self::EXAMPLES[$type];
-  }
-
   /**
    * @return mixed
    */

@@ -12,9 +12,6 @@ use MotionDots\Process\Context;
  */
 abstract class AbstractType implements TypeInterface {
 
-  public const NAME        = 'No name';
-  public const DESCRIPTION = 'No description';
-
   /**
    * @var mixed
    */
@@ -31,11 +28,6 @@ abstract class AbstractType implements TypeInterface {
     $this->field      = $field;
     $this->param_name = $param_name;
     $this->context    = &$context;
-  }
-
-
-  public function example(): string {
-    return 'No example';
   }
 
   /**

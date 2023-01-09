@@ -10,13 +10,6 @@ use MotionDots\Exception\ErrorException;
  * @author Jean Isahakyan <jeanisahakyan@gmail.com>
  */
 class PositiveListType extends AbstractType {
-  public const NAME = 'positive_list';
-  public const DESCRIPTION = '';
-
-  public function example(): string {
-    return '1,2,3';
-  }
-
   public function parse(): array {
     $values = explode(',', $this->field);
     $result = [];

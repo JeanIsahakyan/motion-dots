@@ -3,7 +3,7 @@
 namespace MotionDots\Process;
 
 use MotionDots\Exception\ErrorException;
-use MotionDots\Method\System;
+use MotionDots\Method\System\System;
 use MotionDots\Schema\Schema;
 
 /**

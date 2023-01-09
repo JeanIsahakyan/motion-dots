@@ -21,7 +21,4 @@ interface TypeInterface {
    * @return mixed
    */
   public function build();
-
-  public function example(): string;
-
 }
