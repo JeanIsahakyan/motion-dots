@@ -19,15 +19,7 @@ class System extends AbstractMethod {
     $this->separator = $separator;
   }
 
-  private function getName(string $input): string {
-    $input = explode('\\', $input);
-    $input = end($input);
-    $input = substr($input, 0, strlen($input) - 4);
-    $input = preg_split('/(^[^A-Z]+|[A-Z][^A-Z]+)/', $input, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-    return strtolower(implode('_', $input));
-  }
-
-  private function getTypeName(string $name, SystemMethodParamResponse $row): SystemMethodParamResponse {
+  private function prepareType(string $name, SystemMethodParamResponse $row): SystemMethodParamResponse {
     if (enum_exists($name)) {
       $row->setType('enum');
       /**
@@ -52,10 +44,11 @@ class System extends AbstractMethod {
         $properties[$property->getName()] = $this->prepareResponse($property->getName(), $property->getType(), $uses, $phpdoc);
       }
       $row->setType('object');
+      $row->setTypeName($this->prepareTypeName($class));
       $row->setProperties(array_values($properties));
     }
     if ($interface === TypeInterface::class) {
-      return $row->setType($this->getName($name));
+      return $row->setType('string');
     }
     return $row;
   }
@@ -109,7 +102,7 @@ class System extends AbstractMethod {
         continue;
       }
       $row = SystemMethodsResponse::create()
-      ->setName($method_name);
+        ->setName($method_name);
       $uses = $this->getUses($reflection->getFileName());
       $methods = [];
       foreach ($reflection->getMethods() as $action) {
@@ -128,7 +121,7 @@ class System extends AbstractMethod {
         $return_type = $action->getReturnType();
         $response = $this->prepareResponse(null, $return_type, $uses, $phpdoc);
         $method = SystemMethodResponse::create()
-        ->setName("{$method_name}{$this->separator}{$action_name}");
+          ->setName("{$method_name}{$this->separator}{$action_name}");
         if ($params) {
           $method->setParams($params);
         }
@@ -141,6 +134,14 @@ class System extends AbstractMethod {
       $result[] = $row;
     }
     return $result;
+  }
+
+  private function prepareTypeName($input): ?string {
+    if (!$input) {
+      return null;
+    }
+    $name = explode('\\', $input->getName());
+    return $name[count($name) - 1];
   }
 
   private function prepareResponse(?string $name, $return_type, $uses, $phpdoc) {
@@ -166,17 +167,18 @@ class System extends AbstractMethod {
           $enum = $info['type'];
           $enum = $enum::cases();
           $row->setItems(SystemMethodParamResponse::create()
-          ->setType('enum')
-          ->setEnum(array_map(fn($case) => $case->value, $enum))
-          ->setEnumNames(array_map(fn($case) => $case->name, $enum)));
+            ->setType('enum')
+            ->setEnum(array_map(fn($case) => $case->value, $enum))
+            ->setEnumNames(array_map(fn($case) => $case->name, $enum)));
           return $row;
         }
-        $row->setItems($this->getTypeName($info['type'], SystemMethodParamResponse::create()));
+        $row->setItems($this->prepareType($info['type'], SystemMethodParamResponse::create()));
       }
       return $row;
     }
+    $row->setTypeName($this->prepareTypeName($return_type));
     if ($return_type->getName()) {
-      return $this->getTypeName($return_type->getName(), $row);
+      return $this->prepareType($return_type->getName(), $row);
     }
     return $row;
   }

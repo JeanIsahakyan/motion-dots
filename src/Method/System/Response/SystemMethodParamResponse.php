@@ -19,6 +19,7 @@ class SystemMethodParamResponse extends AbstractResponse {
 
   public ?array $enum;
   public ?array $enum_names;
+  public ?string $type_name = null;
 
   /**
    * @return string|null
@@ -131,4 +132,14 @@ class SystemMethodParamResponse extends AbstractResponse {
     $this->enum_names = $enum_names;
     return $this;
   }
+
+  public function getTypeName(): ?string {
+    return $this->type_name;
+  }
+
+  public function setTypeName(?string $type_name): SystemMethodParamResponse {
+    $this->type_name = $type_name;
+    return $this;
+  }
+
 }
