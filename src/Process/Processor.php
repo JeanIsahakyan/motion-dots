@@ -55,6 +55,10 @@ class Processor {
     return $this->context;
   }
 
+  public function getSeparator(): string {
+    return $this->separator;
+  }
+
   /**
    * @throws ErrorException
    */
