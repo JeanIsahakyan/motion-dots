@@ -21,12 +21,16 @@ class Generator {
   public function generate(Processor $processor, string $files_folder): void {
     $files_folder = rtrim($files_folder, '/');
 
-    $response = $processor->execute('system.getSchema');
-    $schema = $response['response'];
-    $separator = $processor->getSeparator();
-
     $realpath = realpath($files_folder);
     $this->echo("Generating Typescript schema in {$realpath}/");
+
+    $separator = $processor->getSeparator();
+
+    $response = $processor->execute('system.getSchema');
+    $schema = (array)$response['response'];
+    if (!$schema) {
+      $this->echo("🥵  An error has ocurred while executing 'system.getSchema'"); 
+    }
 
     foreach ($schema as $space_schema) {
       $space_name = (string)$space_schema['name'];
