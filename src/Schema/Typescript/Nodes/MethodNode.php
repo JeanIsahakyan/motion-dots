@@ -39,7 +39,7 @@ class MethodNode implements NodeInterface {
 
     return <<<EOT
       export const {$name}Method = '{$method_name}';
-      export type {$name}Params = {{$params}};
+      export interface {$name}Params {{$params}};
       export type {$name}Response = {$response};
       EOT;
   }
