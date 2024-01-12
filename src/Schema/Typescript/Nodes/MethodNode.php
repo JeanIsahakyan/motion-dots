@@ -2,6 +2,13 @@
 
 namespace MotionDots\Schema\Typescript\Nodes;
 
+/**
+ * Class MethodNode
+ *
+ * @package MotionDots\Schema\Typescript
+ *
+ * @author Ermak Aleksandr a@yermak.info
+ */
 class MethodNode implements NodeInterface {
 
   private string $name;

@@ -4,6 +4,13 @@ namespace MotionDots\Schema\Typescript\Nodes;
 
 use MotionDots\Schema\Typescript\TypeMapper;
 
+/**
+ * Class ResponseNode
+ *
+ * @package MotionDots\Schema\Typescript
+ *
+ * @author Ermak Aleksandr a@yermak.info
+ */
 class ResponseNode implements NodeInterface {
 
     private string $name;

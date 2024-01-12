@@ -5,6 +5,13 @@ namespace MotionDots\Schema\Typescript;
 use MotionDots\Process\Processor;
 use MotionDots\Schema\Typescript\Nodes\MethodsNode;
 
+/**
+ * Class Generator
+ *
+ * @package MotionDots\Schema\Typescript
+ *
+ * @author Ermak Aleksandr a@yermak.info
+ */
 class Generator {
 
   /** @var string[] */

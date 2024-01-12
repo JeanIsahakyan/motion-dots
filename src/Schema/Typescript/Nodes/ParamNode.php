@@ -4,6 +4,13 @@ namespace MotionDots\Schema\Typescript\Nodes;
 
 use MotionDots\Schema\Typescript\TypeMapper;
 
+/**
+ * Class ParamNode
+ *
+ * @package MotionDots\Schema\Typescript
+ *
+ * @author Ermak Aleksandr a@yermak.info
+ */
 class ParamNode implements NodeInterface {
   private string $type;
   private string $name;
