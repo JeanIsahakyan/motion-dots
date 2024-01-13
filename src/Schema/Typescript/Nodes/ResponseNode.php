@@ -45,10 +45,6 @@ class ResponseNode implements NodeInterface {
       return str_starts_with($property_name, '__');
     }
 
-    public function getTypeName(): string {
-      return $this->type_name;
-    }
-
     /** @return self[] */
     public function getResponseObjects(): array {
       if ($this->type !== 'object') {
@@ -68,12 +64,12 @@ class ResponseNode implements NodeInterface {
 
     public function toString(): string {
       if ($this->type === 'object') {
-        return $this->objectToString();
+        return $this->type_name;
       }
-      return $this->primitiveToString();
+      return TypeMapper::map($this->type);
     }
 
-    private function objectToString(): string {
+    public function objectToString(): string {
       $properties = "\n";
       foreach ($this->properties as $property) {
         if ($property->type === 'object') {
@@ -84,7 +80,7 @@ class ResponseNode implements NodeInterface {
         $properties = $properties . $property . "\n";
       }
 
-      return "{{$properties}}";
+      return "export type {$this->type_name} = {{$properties}};";
     }
 
     private function innerObjectToString(): string {
@@ -97,12 +93,6 @@ class ResponseNode implements NodeInterface {
       $type = TypeMapper::map($this->type);
       $is_required = $this->is_required ? '' : '?';
       return "  {$this->name}{$is_required}: {$type};";
-    }
-
-    private function primitiveToString(): string {
-      $type = TypeMapper::map($this->type);
-      $is_required = $this->is_required ? '' : ' | null';
-      return "{$this->name}: {$type}{$is_required};";
     }
 
 }

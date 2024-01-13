@@ -66,8 +66,7 @@ class MethodsNode implements NodeInterface {
 
     $response_objects = '';
     foreach ($methods_response_objects as $methods_response_object) {
-      $methods_response_object = "export type {$methods_response_object->getTypeName()} = {$methods_response_object->toString()}";
-      $response_objects = $response_objects . $methods_response_object .  "\n\n";
+      $response_objects = $response_objects . $methods_response_object->objectToString() .  "\n\n";
     }
     $response_objects = substr($response_objects, 0, -2);
 
