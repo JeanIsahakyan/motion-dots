@@ -19,6 +19,8 @@ class ResponseNode implements NodeInterface {
     private bool $is_required;
     /** @var self[] */
     private array $properties = [];
+    /** @var string[] enum_name => enum_value */
+    private array $enum = [];
 
     /** @param mixed[] $schema */
     public function __construct(array $schema) {
@@ -39,6 +41,19 @@ class ResponseNode implements NodeInterface {
         }
         $this->properties = $properties;
       }
+
+      if ($this->type === 'enum') {
+        $enum_schema = $schema['enum'];
+        $enum_names_schema = $schema['enum_names'];
+
+        $enum = [];
+        for ($i = 0; $i < count($enum_names_schema); $i++) {
+          $enum_name = $enum_names_schema[$i];
+          $enum_value = $enum_schema[$i];
+          $enum[$enum_name] = $enum_value;
+        }
+        $this->enum = $enum;
+      }
     }
 
     private static function isExcludedProperty(string $property_name): bool {
@@ -53,7 +68,7 @@ class ResponseNode implements NodeInterface {
 
       $response_objects = [$this->type_name => $this];
       foreach ($this->properties as $property) {
-        if ($property->type === 'object') {
+        if (in_array($property->type, ['object', 'enum'])) {
           $response_objects[$property->type_name] = $property;
           $response_objects += $property->getResponseObjects();
         }
@@ -63,25 +78,53 @@ class ResponseNode implements NodeInterface {
     }
 
     public function toString(): string {
-      if ($this->type === 'object') {
+      if (in_array($this->type, ['object', 'enum'])) {
         return $this->type_name;
       }
       return TypeMapper::map($this->type);
     }
 
+    public function complexToString(): string {
+      return match ($this->type) {
+        'enum'   => $this->enumToString(),
+        'object' => $this->objectToString(),
+        default  => '',
+      };
+    }
+
     public function objectToString(): string {
       $properties = "\n";
       foreach ($this->properties as $property) {
-        if ($property->type === 'object') {
-          $property = $property->innerObjectToString();
-        } else {
-          $property = $property->innerPrimitiveToString();
-        }
+        $property = match ($property->type) {
+          'enum'   => $property->innerEnumToString(),
+          'object' => $property->innerObjectToString(),
+          default  => $property->innerPrimitiveToString(),
+        };
         $properties = $properties . $property . "\n";
       }
 
       return "export type {$this->type_name} = {{$properties}};";
     }
+
+  public function enumToString(): string {
+    $enum = "\n";
+    foreach ($this->enum as $enum_name => $enum_value) {
+      if (is_int($enum_value)) {
+        $enum = $enum . "  {$enum_name} = {$enum_value},\n";
+      }
+      if (is_string($enum_value)) {
+        $enum = $enum . "  {$enum_name} = '{$enum_value}',\n";
+      }
+    }
+
+    return "export enum {$this->type_name} {{$enum}}";
+  }
+
+  public function innerEnumToString(): string {
+    $type = $this->type_name;
+    $is_required = $this->is_required ? '' : '?';
+    return "  {$this->name}{$is_required}: {$type};";
+  }
 
     private function innerObjectToString(): string {
       $type = $this->type_name;

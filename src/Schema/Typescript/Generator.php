@@ -36,7 +36,7 @@ class Generator {
     $response = $processor->execute('system.getSchema');
     $schema = (array)$response['response'];
     if (!$schema) {
-      $this->echo("🥵  An error has ocurred while executing 'system.getSchema'"); 
+      $this->echo("🥵  An error has occurred while executing 'system.getSchema'");
     }
 
     foreach ($schema as $space_schema) {
