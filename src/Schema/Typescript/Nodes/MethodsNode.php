@@ -12,6 +12,8 @@ namespace MotionDots\Schema\Typescript\Nodes;
 class MethodsNode implements NodeInterface {
 
   private string $name;
+
+  /** @var MethodNode[] */
   private array $methods;
 
   /** @param mixed[] $schema */
@@ -42,6 +44,7 @@ class MethodsNode implements NodeInterface {
       // Response Objects
 
       {$response_objects}
+
       EOT;
   }
 
@@ -66,7 +69,7 @@ class MethodsNode implements NodeInterface {
 
     $response_objects = '';
     foreach ($methods_response_objects as $methods_response_object) {
-      $response_objects = $response_objects . $methods_response_object->objectToString() .  "\n\n";
+      $response_objects = $response_objects . $methods_response_object->complexToString() .  "\n\n";
     }
     $response_objects = substr($response_objects, 0, -2);
 
