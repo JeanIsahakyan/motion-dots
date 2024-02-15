@@ -2,22 +2,23 @@
 
 namespace MotionDots\Schema\Typescript\Nodes;
 
+use MotionDots\Schema\Typescript\TypeMapper;
+
 /**
  * Class MethodNode
  *
  * @package MotionDots\Schema\Typescript
  *
- * @author Ermak Aleksandr a@yermak.info
+ * @author  Ermak Aleksandr a@yermak.info
  */
-class MethodNode implements NodeInterface {
+class MethodNode {
 
   private string $name;
-  /** @var ParamNode[] */
-  private array $params;
-  private string $separator;
-  private ResponseNode $response;
+  /** @var TypeNodeInterface[] */
+  private array             $params;
+  private string            $separator;
+  private TypeNodeInterface $response;
 
-  /** @param mixed[] $schema */
   public function __construct(array $schema, string $separator) {
     $this->separator = $separator;
 
@@ -26,23 +27,18 @@ class MethodNode implements NodeInterface {
     $params = [];
     $params_schema = (array)$schema['params'];
     foreach ($params_schema as $param_schema) {
-      $params[] = new ParamNode($param_schema);
+      $params[] = TypeMapper::map($param_schema);
     }
     $this->params = $params;
 
-    $this->response = new ResponseNode($schema['response']);
-  }
-
-  /** @return ResponseNode[] */
-  public function getResponseObjects(): array {
-    return $this->response->getResponseObjects();
+    $this->response = TypeMapper::map($schema['response']);
   }
 
   public function toString(): string {
     $name = $this->nameToString();
     $method_name = $this->name;
     $params = $this->paramsToString();
-    $response = $this->responseToString();
+    $response = $this->response->getTypeName();
 
     return <<<EOT
       export const {$name}Method = '{$method_name}';
@@ -64,13 +60,33 @@ class MethodNode implements NodeInterface {
 
     $params = "\n";
     foreach ($this->params as $param) {
-      $params = $params . '  ' . $param->toString() . "\n";
+      $params = $params . $param->innerToString() . "\n";
     }
     return $params;
   }
 
-  private function responseToString(): string {
-    return $this->response->toString();
+  /** @return ObjectNode[] */
+  public function getObjects(): array {
+    $objects = [];
+    $response = $this->response;
+    if ($response instanceof ObjectNode) {
+      $objects[$response->getTypeName()] = $response;
+      $objects += $response->getInnerObjects();
+    }
+    return $objects;
+  }
+
+  /** @return EnumNode[] */
+  public function getEnums(): array {
+    $enums = [];
+    $response = $this->response;
+    if ($response instanceof EnumNode) {
+      $enums[$response->getTypeName()] = $response;
+    }
+    if ($response instanceof ObjectNode) {
+      $enums += $response->getInnerEnums();
+    }
+    return $enums;
   }
 
 }
