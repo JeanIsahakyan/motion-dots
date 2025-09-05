@@ -1,177 +1,242 @@
 
-# MotionDots Documentation
+# MotionDots
 
-**MotionDots** is a PHP framework designed to simplify API development by providing tools for dynamic method invocation, input validation, structured responses, and more. It streamlines the process of building APIs by handling common tasks such as parameter validation, response formatting, error handling, and supports the use of native PHP 8.1 enums for robust type definitions.
+**MotionDots** is a lightweight PHP framework designed to simplify API development by providing tools for dynamic method invocation, input validation, structured responses, and TypeScript generation. It streamlines the process of building APIs by handling common tasks such as parameter validation, response formatting, error handling, and supports the use of native PHP 8.1 enums for robust type definitions.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://www.php.net/)
+
+## ✨ Key Features
+
+-   **🚀 Dynamic Method Invocation**: Automatically maps API requests to methods in your classes
+-   **🛡️ Type Safety**: Validates and sanitizes input parameters using custom types
+-   **📋 Structured Responses**: Ensures consistent response formats across your API
+-   **⚡ Error Handling**: Comprehensive error system with predefined error codes
+-   **🔧 Enum Support**: Native PHP 8.1 enums for robust type definitions
+-   **🔄 Context Management**: Shares data across methods and types during a request
+-   **📱 TypeScript Generation**: Automatic TypeScript definitions for frontend integration
+-   **🔍 System Methods**: Built-in introspection and utility methods
+
+## 🎯 Perfect For
+
+-   **API Developers** looking to quickly build robust APIs
+-   **Projects** requiring strict input validation and type safety
+-   **Teams** needing consistent response formats across endpoints
+-   **Applications** where dynamic method routing is beneficial
+-   **Frontend Teams** requiring TypeScript integration
+-   **Systems** needing shared context between methods and types
+
+## 📚 Documentation
+
+For comprehensive documentation, visit our [Documentation Index](docs/index.md):
+
+- **[Quick Start Guide](docs/README.md)** - Get up and running quickly
+- **[Architecture Overview](docs/architecture.md)** - Understand the system design
+- **[API Reference](docs/api-reference.md)** - Complete API documentation
+- **[Examples & Patterns](docs/examples.md)** - Real-world usage examples
+- **[TypeScript Integration](docs/typescript-generation.md)** - Frontend type generation
 
 ----------
 
-## What is MotionDots?
+## 🚀 Quick Start
 
+### Requirements
 
-**MotionDots** is a lightweight PHP framework that aids in developing APIs by providing:
--   **Dynamic Method Invocation**: Automatically maps API requests to methods in your classes.
--   **Input Validation**: Validates and sanitizes input parameters using custom types.
--   **Structured Responses**: Ensures consistent response formats across your API.
--   **Error Handling**: Simplifies error reporting and handling.
--   **Enum Support**: Utilizes native PHP 8.1 enums for robust type definitions.
--   **Context Management**: Shares data across methods and types during a request.
+- **PHP 8.1+** (required for enum support and modern features)
+- **Composer** for dependency management
+- **JSON extension** (usually included with PHP)
 
-### Purpose and Use Cases
+### Installation
 
-MotionDots is ideal for:
+Install MotionDots via Composer:
 
--   Developers looking to quickly build robust APIs.
--   Projects requiring strict input validation.
--   APIs that need consistent response formats.
--   Applications where dynamic method routing is beneficial.
--   Projects that can benefit from the use of enums for parameter and response type definitions.
--   Applications needing a shared context between methods and types.
-
-----------
-
-## Getting Started with MotionDots
-
-### Installation via Composer
-
-Ensure your PHP version is **8.1** or higher.
-
-Install MotionDots via Composer by adding it to your `composer.json` or running:
-
-```
+```bash
 composer require jeanisahakyan/motion-dots
 ```
 
-### Recommended Project Structure
+### Basic Setup
 
-Organize your project as follows:
+Create a simple API endpoint in just a few lines:
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+use MotionDots\Process\Processor;
+use MotionDots\Schema\Schema;
+use API\Methods\Users;
+
+// Create schema and add methods
+$schema = Schema::create()->addMethods([new Users()]);
+
+// Create processor
+$processor = new Processor($schema, '.');
+
+// Handle request
+$response = $processor->invokeProcess('users.getUser', $params);
+echo json_encode($response);
+```
+
+> 📖 **Need more details?** Check out our [Complete Quick Start Guide](docs/README.md) for detailed setup instructions.
+
+### Project Structure
+
 ```
 project/
 ├── composer.json
 ├── vendor/
 │   └── autoload.php
 ├── index.php
+├── docs/                    # 📚 Comprehensive documentation
 └── src/
     ├── API/
-    │   ├── Methods/
+    │   ├── Methods/         # 🚀 API endpoint classes
     │   │   └── Users.php
-    │   ├── Responses/
+    │   ├── Responses/       # 📋 Response format classes
     │   │   └── UserResponse.php
-    │   ├── Types/
+    │   ├── Types/          # 🛡️ Custom parameter types
     │   │   ├── EmailType.php
-    │   │   ├── PasswordType.php
-    │   └── Type/
-    │      └── UserStatus.php
-    ├── YourProcessor.php
+    │   │   └── PasswordType.php
+    │   └── Enums/          # 🔧 PHP 8.1 enums
+    │       └── UserStatus.php
     └── (Other application files)
 ```
 
-### Creating the API Processor
+## 🔧 Core Concepts
 
-The API processor handles incoming requests and routes them to the appropriate methods. Place it in `src/YourProcessor.php`.
+### API Methods
 
-**Example `YourProcessor.php`:**
+Create API endpoints by extending `AbstractMethod`:
+
 ```php
-<?php
-// src/YourProcessor.php
-
-namespace YourNamespace;
-
-use MotionDots\Processor\Processor;
-use MotionDots\Schema\Schema;
-use API\Methods\Users;
-use MotionDots\Method\System\System;
-
-class YourProcessor {
-    public function handleRequest() {
-        // Set headers
-        header("Access-Control-Allow-Origin: *");
-        header('Content-Type: application/json; charset=UTF-8');
-
-        try {
-            // Merge GET, POST, and FILES parameters
-            $params = array_merge($_GET, $_POST, $_FILES);
-
-            // Create a schema and add methods
-            $schema = Schema::create()->addMethods([
-                new Users(),
-                // Add other method classes here
-            ]);
-
-            // Instantiate the processor
-            $processor = new Processor($schema, '.');
-
-            // Set initial context values if needed
-            $processor->getContext()->setMany([
-                'requestStartTime' => microtime(true),
-                // Add other context variables here
-            ]);
-
-            // Determine the method to invoke
-            if (preg_match('/\/api\/([a-zA-Z\.]+)/i', $_SERVER['REQUEST_URI'], $matches)) {
-                [, $method] = $matches;
-            } else {
-                $method = 'system.getSchema'; // Default method
-            }
-
-            // Invoke the method and output the response
-            $response = $processor->invokeProcess($method, $params);
-            echo json_encode($response);
-        } catch (\Exception $exception) {
-            // Handle exceptions and output error response
-            echo json_encode([
-                'error' => [
-                    'error_code'    => $exception->getCode(),
-                    'error_message' => $exception->getMessage(),
-                ]
-            ]);
-        }
+class Users extends AbstractMethod {
+    public function getUser(PositiveType $id): UserResponse {
+        $userId = $id->parse();
+        return UserResponse::create()->setId($userId);
     }
 }
 ```
-**Explanation:**
 
--   **Setting Context Values:**
-    -   After instantiating the `Processor`, you can access the `Context` object using `$processor->getContext()`.
-    -   Use `set()` or `setMany()` methods to set initial context values.
-    -   These values will be accessible in your methods and types during the request lifecycle.
+### Custom Types
 
-Then, in your `index.php`, you can instantiate and use this processor:
+Build type-safe parameters with validation:
 
-**Example `index.php`:**
+```php
+class EmailType extends AbstractType {
+    public function parse(): string {
+        $email = filter_var($this->field, FILTER_VALIDATE_EMAIL);
+        if ($email === false) {
+            throw new ErrorException(ErrorException::PARAM_INCORRECT, "Invalid email");
+        }
+        return $email;
+    }
+}
+```
+
+### Response Classes
+
+Structure your API responses:
+
+```php
+class UserResponse extends AbstractResponse {
+    public int $id = 0;
+    public string $name = '';
+    
+    public function setId(int $id): self {
+        $this->id = $id;
+        return $this;
+    }
+}
+```
+
+> 📖 **Learn more:** See our [Method System](docs/method-system.md), [Type System](docs/type-system.md), and [Response System](docs/response-system.md) documentation.
+
+## 🛠️ Advanced Setup
+
+### Complete API Processor
+
 ```php
 <?php
+// index.php
 require_once 'vendor/autoload.php';
 
-use YourNamespace\YourProcessor;
+use MotionDots\Process\Processor;
+use MotionDots\Schema\Schema;
+use API\Methods\Users;
 
-$processor = new YourProcessor();
-$processor->handleRequest();
+// Set headers
+header("Access-Control-Allow-Origin: *");
+header('Content-Type: application/json; charset=UTF-8');
+
+try {
+    // Merge request parameters
+    $params = array_merge($_GET, $_POST, $_FILES);
+    
+    // Create schema and add methods
+    $schema = Schema::create()->addMethods([
+        new Users(),
+        // Add other method classes here
+    ]);
+    
+    // Create processor
+    $processor = new Processor($schema, '.');
+    
+    // Set initial context
+    $processor->getContext()->setMany([
+        'requestTime' => microtime(true),
+        'clientIp' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+    ]);
+    
+    // Extract method from URL
+    if (preg_match('/\/api\/([a-zA-Z\.]+)/i', $_SERVER['REQUEST_URI'], $matches)) {
+        [, $method] = $matches;
+    } else {
+        $method = 'system.getSchema'; // Default to schema info
+    }
+    
+    // Invoke method and return response
+    $response = $processor->invokeProcess($method, $params);
+    echo json_encode($response);
+    
+} catch (\Exception $exception) {
+    echo json_encode([
+        'error' => [
+            'error_code' => $exception->getCode(),
+            'error_message' => $exception->getMessage(),
+        ]
+    ]);
+}
 ```
 
 
-## Creating a New API Method
+## 📖 Detailed Examples
 
-API methods are organized into classes extending `AbstractMethod`. Each public method in the class becomes an API endpoint.
+### Creating API Methods
 
-### Defining the Method Class
+API methods are organized into classes extending `AbstractMethod`. Each public method becomes an API endpoint.
 
-Create a new class in `src/API/Methods/`.
-
-**Example:**
 ```php
 <?php
 // src/API/Methods/Users.php
-
 namespace API\Methods;
 
 use MotionDots\Method\AbstractMethod;
 use API\Responses\UserResponse;
 use API\Types\EmailType;
-use API\Types\PasswordType;
-use API\Enums\UserStatus;
+use MotionDots\Type\PositiveType;
 
 class Users extends AbstractMethod {
-    // Methods will be defined here
+    public function getUser(PositiveType $id): UserResponse {
+        $userId = $id->parse();
+        return UserResponse::create()->setId($userId);
+    }
+    
+    public function createUser(EmailType $email, string $name): UserResponse {
+        $emailValue = $email->parse();
+        return UserResponse::create()
+            ->setEmail($emailValue)
+            ->setName($name);
+    }
 }
 ```
 
@@ -441,37 +506,83 @@ Errors thrown in your methods are caught in the `YourProcessor.php` and returned
 }
 ```
 
-## Typescript schema generation
+## 📱 TypeScript Generation
 
-### Conventions
-
-If you are going to use typescript api schema generation you have to follow these principles:
-- Response class names must be unique
-- Enum names used in parameters and response classes must be unique
-
-### Structure
-
-```
-api-schema
-├── methods
-├── enums
-└── responses
-```
-
-### Generation
-
-Run php script with content below in you project directory
+Generate TypeScript definitions automatically for frontend integration:
 
 ```php
-$schema = Schema::create()
-  ->addMethods($methods);
-$processor = new Processor($schema, '.');
+<?php
+use MotionDots\Schema\Typescript\Generator;
 
-$files_folder = "./static/api-schema/"; // any existing folder relative to current working directory
-
+// Generate TypeScript definitions
 Generator::create()
-  ->excludeSpaces('accounts', 'users') // default is 'system'
-  ->setIsVerbose(false) // default is true
-  ->setFilesPath('./static/api-schema') // default is './api-schema'
-  ->generate($processor);
+    ->setFilesPath('./frontend/src/types/api')
+    ->setIsVerbose(true)
+    ->excludeSpaces('admin', 'debug')
+    ->generate($processor);
 ```
+
+This creates organized TypeScript files:
+```
+frontend/src/types/api/
+├── methods/
+│   ├── users.d.ts
+│   └── index.d.ts
+├── responses/
+│   ├── UserResponse.d.ts
+│   └── index.d.ts
+└── enums/
+    ├── UserStatus.d.ts
+    └── index.d.ts
+```
+
+## ⚡ Error Handling
+
+MotionDots provides comprehensive error handling with predefined error codes:
+
+```php
+use MotionDots\Exception\ErrorException;
+
+// Throw specific errors
+throw new ErrorException(
+    ErrorException::PARAM_INCORRECT,
+    "User with ID {$userId} not found"
+);
+```
+
+**Common Error Codes:**
+- `PARAM_INCORRECT` (-9) - Parameter validation failed
+- `PARAM_IS_REQUIRED` (-5) - Required parameter missing
+- `METHOD_UNDEFINED` (-8) - Method not registered
+- `INTERNAL_ERROR` (-10) - System error
+
+## 🎯 What's Next?
+
+Ready to dive deeper? Check out our comprehensive documentation:
+
+- **[📚 Complete Documentation](docs/index.md)** - Full documentation index
+- **[🚀 Quick Start Guide](docs/README.md)** - Detailed setup instructions
+- **[🏗️ Architecture Overview](docs/architecture.md)** - System design and patterns
+- **[📖 API Reference](docs/api-reference.md)** - Complete API documentation
+- **[💡 Examples & Patterns](docs/examples.md)** - Real-world usage examples
+- **[🔧 TypeScript Integration](docs/typescript-generation.md)** - Frontend type generation
+- **[🛡️ Type System](docs/type-system.md)** - Custom types and validation
+- **[📋 Response System](docs/response-system.md)** - Response formatting and serialization
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📞 Support
+
+- 📖 **Documentation**: Check our [comprehensive docs](docs/index.md)
+- 🐛 **Issues**: Report bugs on GitHub Issues
+- 💡 **Questions**: Open a discussion for questions and ideas
+
+---
+
+**MotionDots** - Building robust APIs with PHP 8.1+ features, type safety, and automatic TypeScript generation. 🚀
